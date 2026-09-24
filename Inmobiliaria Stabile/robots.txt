@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://stabile-inmobiliaria.vercel.app/sitemap.xml
