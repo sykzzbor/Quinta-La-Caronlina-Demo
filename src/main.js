@@ -20,6 +20,12 @@ ScrollTrigger.config({ ignoreMobileResize: true, autoRefreshEvents: 'visibilityc
 
 const root = document.documentElement;
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// En celulares no hay tramos fijados ni parallax: el scroll táctil queda nativo y estable.
+const mobileMQ = window.matchMedia('(max-width: 899px)');
+const mobile = mobileMQ.matches;
+const pinHero = !reduce && !mobile;
+const pinNight = !reduce && !mobile;
+mobileMQ.addEventListener('change', () => location.reload());
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -287,6 +293,8 @@ function initHero() {
     .from(foot, { y: 22, opacity: 0, duration: 1.1, stagger: 0.08 }, 0.8)
     .from('.hdr', { y: -16, opacity: 0, duration: 1 }, 0.4);
 
+  if (!pinHero) return;
+
   // Scroll: la ventana crece hasta ser el paisaje entero
   const tl = gsap.timeline({
     scrollTrigger: {
@@ -344,26 +352,42 @@ function wrapFrames() {
 
 function initReveals() {
   if (reduce) return;
-  $$('.ph__frame').forEach((frame) => {
-    const media = frame.firstElementChild;
-    gsap.timeline({ scrollTrigger: { trigger: frame, start: 'top 88%', toggleActions: 'play none none none' } })
-      .fromTo(frame, { clipPath: 'inset(22% 8% 22% 8%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'expo.out' }, 0)
-      .fromTo(media, { scale: 1.22 }, { scale: 1, duration: 1.8, ease: 'expo.out' }, 0);
+  const once = (trigger, start = 'top 82%') => ({ trigger, start, toggleActions: 'play none none none' });
+
+  // Cortina solo en la foto principal de cada capítulo, y cada una abre hacia otro lado.
+  [
+    ['.parque__a', 'inset(0% 100% 0% 0%)'],
+    ['.bodas__hero', 'inset(0% 0% 0% 100%)'],
+    ['.rincones__b', 'inset(0% 0% 100% 0%)'],
+    ['.casa__photo', 'inset(100% 0% 0% 0%)'],
+  ].forEach(([sel, from]) => {
+    const frame = $(`${sel} .ph__frame`);
+    if (!frame) return;
+    gsap.timeline({ scrollTrigger: once(frame, 'top 85%') })
+      .fromTo(frame, { clipPath: from }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.6, ease: 'expo.inOut' }, 0)
+      .fromTo(frame.firstElementChild, { scale: 1.15 }, { scale: 1, duration: 2, ease: 'expo.out' }, 0);
   });
-  $$('.ph figcaption, [data-reveal], .bodas__quote footer, .edad__text, .specs__item, .familias__cta, .split__hint, .credits__list li, .credits .eyebrow, .noche__end .btn, .llegar__big, .llegar__addr, .llegar__actions, .casa__text .btn').forEach((el) => {
-    gsap.from(el, {
-      y: 26,
-      opacity: 0,
-      duration: 1.1,
-      ease: 'expo.out',
-      scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' },
-    });
+
+  // Edades: las dos fotos aparecen como reveladas, una después de la otra.
+  $$('.edad').forEach((el) => {
+    gsap.from($$('.edad__photos .ph__frame', el), { opacity: 0, duration: 1.3, stagger: 0.25, ease: 'power2.out', scrollTrigger: once(el, 'top 72%') });
   });
+
+  // Créditos de película: los nombres suben de a uno.
+  gsap.from('.credits__list li', { yPercent: 70, opacity: 0, duration: 1.2, stagger: 0.2, ease: 'expo.out', scrollTrigger: once('.credits', 'top 75%') });
+
+  // Citas: se aclaran como tinta que se seca.
+  $$('.bodas__quote p, .noche__quote p').forEach((p) => {
+    gsap.from(p, { opacity: 0, filter: 'blur(6px)', duration: 1.8, ease: 'power2.out', scrollTrigger: once(p, 'top 80%') });
+  });
+
+  // Cifras: suben desde la línea.
+  gsap.from('.specs__num, .specs__word', { yPercent: 45, opacity: 0, duration: 1.3, stagger: 0.12, ease: 'expo.out', scrollTrigger: once('.specs', 'top 80%') });
 }
 
 /* ---------- Profundidad: las fotos del collage se mueven a distinto ritmo ---------- */
 function initParallax() {
-  if (reduce) return;
+  if (reduce || mobile) return;
   const mm = gsap.matchMedia();
   mm.add({ wide: '(min-width: 900px)', narrow: '(max-width: 899px)' }, (ctx) => {
     const k = ctx.conditions.wide ? 10 : 4;
@@ -539,6 +563,12 @@ function initNight() {
   }
 
   let wireDrawn = reduce;
+  if (!pinNight) {
+    // Celular: el título sale del carrusel para no deslizarse con las fotos.
+    const t = $('[data-tendedero]');
+    t.classList.add('is-swipe');
+    t.before($('.noche__head', t));
+  }
   let x = 0;
   layout();
 
@@ -555,9 +585,9 @@ function initNight() {
     wireDrawn = true;
     gsap.to(path, { strokeDashoffset: 0, duration: 2.2, ease: 'power2.inOut' });
     lamps.forEach((l, i) => {
-      if (lampX[i] + x < window.innerWidth * 0.95) setTimeout(() => l.setAttribute('data-on', ''), 500 + i * 220);
+      if (!pinNight || lampX[i] + x < window.innerWidth * 0.95) setTimeout(() => l.setAttribute('data-on', ''), 500 + i * 180);
     });
-    setTimeout(lightUp, 600);
+    if (pinNight) setTimeout(lightUp, 600);
   };
   const onST = ScrollTrigger.create({ trigger: viewport, start: 'top 75%', onEnter: turnOn });
   syncers.push(() => { if (window.scrollY >= onST.start) turnOn(); });
@@ -581,6 +611,13 @@ function initNight() {
     end: 'bottom top',
     onToggle: (self) => { if (self.isActive) gsap.ticker.add(tick); else gsap.ticker.remove(tick); },
   });
+
+  if (!pinNight) {
+    // Celular: se desliza con el dedo; las fotos solo se mecen suave.
+    let w = window.innerWidth;
+    window.addEventListener('resize', () => { if (window.innerWidth !== w) { w = window.innerWidth; layout(); } });
+    return;
+  }
 
   gsap.to(track, {
     x: () => -dist(),
@@ -606,7 +643,7 @@ function initNight() {
 const HERO_PIN = 1.35;
 let heroDark = false;
 let lightIsDark = false;
-let currentTone = reduce ? 'lino' : 'hero';
+let currentTone = pinHero ? 'hero' : 'lino';
 const hdr = $('[data-hdr]');
 const floatCta = $('[data-float-cta]');
 function updateHeader() {
@@ -621,7 +658,7 @@ let currentChapter = 'llegada';
 function initChapters() {
   // Pasado el hero, la cabecera toma el color de la luz del momento
   // (Los triggers sobre el hero fijado usan posiciones absolutas: su "top" ya incluye el pin.)
-  const solidAt = () => (reduce ? $('.hero').offsetHeight - 80 : window.innerHeight * (HERO_PIN + 1) - 80);
+  const solidAt = () => (pinHero ? window.innerHeight * (HERO_PIN + 1) - 80 : 40);
   const order = $$('[data-bulb]').map((a) => a.dataset.bulb);
   const bulbs = new Map($$('[data-bulb]').map((a) => [a.dataset.bulb, a]));
   const setChapter = (name) => {
@@ -639,7 +676,7 @@ function initChapters() {
   // Capítulo actual = el último cuyo comienzo ya pasó (robusto ante saltos por ancla).
   const secs = $$('[data-chapter]');
   const marks = secs.map((sec) => {
-    const pinned = sec.classList.contains('hero') && !reduce;
+    const pinned = sec.classList.contains('hero') && pinHero;
     return {
       chapter: sec.dataset.chapter,
       tone: pinned ? 'hero' : sec.tagName === 'FOOTER' ? 'pie' : sec.dataset.tone,

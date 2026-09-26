@@ -1314,6 +1314,28 @@ footer[data-tone] {
 }
 .noche__quote em { color: var(--luz); }
 
+/* Tendedero deslizable (celular): scroll horizontal nativo con imán */
+.noche > .noche__head { position: static; padding: var(--section-y) 0 0; }
+.is-swipe .tendedero__viewport {
+  height: auto;
+  min-height: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.is-swipe .tendedero__viewport::-webkit-scrollbar { display: none; }
+.is-swipe .tendedero__track { height: auto; padding: 3.5rem 12vw 1.75rem; will-change: auto; }
+.is-swipe .hang { scroll-snap-align: center; }
+.tendedero.is-swipe::after {
+  content: "Deslizá para ver más fotos →";
+  display: block;
+  padding-inline: var(--gutter);
+  font-family: var(--f-display);
+  font-style: italic;
+  color: var(--muted);
+}
+
 /* ---------- 7 · La casa ---------- */
 .casa__grid {
   display: grid;
@@ -2072,7 +2094,11 @@ footer[data-tone] {
 }
 
 @media (max-width: 899px) {
-  :root { --hdr-h: 4rem; }
+  :root {
+    --hdr-h: 4rem;
+    --gutter: 1.25rem;
+    --section-y: 4.75rem;
+  }
   .hdr { gap: 0.75rem; }
   .qc { width: 2.5rem; height: 1.8rem; }
   .hdr__cta { display: none; }
@@ -2081,52 +2107,87 @@ footer[data-tone] {
   .garland__list li { top: 1.05rem; }
   .garland__list a { width: 1.6rem; }
   .garland__label { display: none; }
-  .hdr__prog span:last-child { font-size: 0.72rem; }
   .float-cta { display: inline-flex; }
 
-  .hero__title { font-size: clamp(3.2rem, 15.5vw, 7rem); line-height: 0.92; }
+  /* Tipografía a escala de teléfono */
+  .display { font-size: clamp(2.45rem, 10.8vw, 3.8rem); line-height: 1; }
+  .chapter-tag { margin-bottom: 1rem; }
+  .body-l { font-size: 1.1rem; }
+  .ph figcaption { font-size: 0.9rem; margin-top: 0.55rem; }
+
+  /* Hero: sin fijar; la ventana del título queda como una franja con el parque */
+  .hero { height: auto; min-height: 100svh; }
+  .hero__stage { min-height: 100svh; padding-top: calc(var(--hdr-h) + 1.5rem); padding-bottom: 1.5rem; }
+  .hero__title { font-size: clamp(3.3rem, 16.5vw, 6rem); line-height: 0.92; margin-block: 2rem; }
   .hero__line { white-space: normal; }
   .hero__line + .hero__line { padding-left: 0; }
   .hero__slot {
     display: block;
     width: 100%;
-    height: 1.55em;
-    margin: 0.14em 0 0.12em;
+    height: 1.7em;
+    margin: 0.14em 0 0.16em;
   }
-  .hero__foot { grid-template-columns: 1fr; gap: 1.25rem; }
+  .hero__foot { grid-template-columns: 1fr; gap: 1.1rem; }
+  .hero__ctas { display: grid; grid-template-columns: 1fr; gap: 0.6rem; }
   .hero__sign { justify-self: start; }
-  .hero__toggle { top: auto; bottom: 0.5rem; }
+  .hero__toggle { top: auto; bottom: 0.25rem; right: var(--gutter); }
 
-  .parque__collage,
+  /* Fotos a sangre: de borde a borde del teléfono */
+  .parque__a,
+  .parque__d,
+  .bodas__hero,
+  .bodas__video,
+  .rincones__b,
+  .casa__photo,
+  .split {
+    margin-left: calc(var(--gutter) * -1);
+    margin-right: calc(var(--gutter) * -1);
+    width: auto;
+  }
+  .parque__a figcaption,
+  .parque__d figcaption,
+  .rincones__b figcaption,
+  .casa__photo figcaption,
+  .bodas__video figcaption { padding-inline: var(--gutter); }
+
+  /* Parque: foto grande, texto, un par de fotos, vista aérea */
+  .parque__collage {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  .parque__a { grid-column: 1 / -1; grid-row: 1; }
+  .parque__text { grid-column: 1 / -1; grid-row: 2; margin: 1.75rem 0 2.25rem; }
+  .parque__b { grid-column: 1; grid-row: 3; margin: 0; }
+  .parque__c { grid-column: 2; grid-row: 3; margin: 0; }
+  .parque__d { grid-column: 1 / -1; grid-row: 4; margin-top: 2.25rem; }
+
+  /* Bodas */
   .bodas__spread,
-  .bodas__walk,
-  .rincones,
-  .casa__grid,
-  .llegar__grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .bodas__walk { display: block; margin-top: 2rem; }
+  .bodas__hero { margin-bottom: 1.75rem; }
+  .bodas__text { padding: 0; gap: 1rem; }
+  .bodas__rings { width: 62%; margin: 2.25rem 0 0 auto; box-shadow: none; }
+  .bodas__walk { margin-top: 3.5rem; }
+  .bodas__quote { margin: 3rem 0 2.5rem; }
+  .bodas__quote p { font-size: clamp(1.8rem, 8.2vw, 2.6rem); line-height: 1.08; }
+  .bodas__walkers { margin: 0; }
+  .credits { margin-top: 4.5rem; }
+  .credits .eyebrow { margin-bottom: 1.5rem; }
+  .credits__list { gap: 1.1rem; }
+  .credits__names { font-size: clamp(1.7rem, 8vw, 2.4rem); }
 
-  .parque__a { grid-column: 1 / -1; }
-  .parque__text { grid-column: 1 / -1; grid-row: 2; margin: 2.5rem 0 0; }
-  .parque__b { grid-column: 3 / -1; grid-row: 3; margin-top: 3.5rem; }
-  .parque__c { grid-column: 1 / span 3; grid-row: 4; margin-top: -3rem; z-index: 1; }
-  .parque__d { grid-column: 1 / -1; grid-row: 5; margin-top: 3.5rem; }
-
-  .bodas__hero { grid-column: 1 / -1; grid-row: 1; margin-right: calc(var(--gutter) * -1); }
-  .bodas__text { grid-column: 1 / -1; grid-row: 2; padding-top: 2rem; }
-  .bodas__rings { grid-column: 3 / -1; grid-row: 3; margin: 2.5rem 0 0; }
-  .bodas__video { grid-column: 1 / -1; }
-  .bodas__walkers { grid-column: 2 / -1; margin-top: 0; }
-  .bodas__quote { grid-column: 1 / -1; grid-row: auto; }
-
-  .edades { display: block; }
+  /* Los que vuelven: cada edad con su número detrás de la foto */
+  .edades { display: block; margin-top: 1.5rem; }
   .edades__sticky { display: none; }
-  .edad { min-height: 0; padding-block: 3.5rem; gap: 0; }
+  .edad { min-height: 0; padding-block: 2.25rem; gap: 0; }
   .edad__num {
     display: block;
     position: relative;
     z-index: 0;
-    margin-bottom: -0.34em;
+    margin-bottom: -0.3em;
     font-family: var(--f-display);
-    font-size: clamp(8rem, 44vw, 14rem);
+    font-size: clamp(7.5rem, 42vw, 12rem);
     line-height: 1;
     letter-spacing: -0.05em;
     color: var(--accent);
@@ -2137,38 +2198,49 @@ footer[data-tone] {
   .edad:nth-child(even) .edad__main { grid-column: 1 / span 5; }
   .edad:nth-child(even) .edad__main { grid-column: 2 / span 5; }
   .edad__side,
-  .edad:nth-child(even) .edad__side { grid-column: 4 / span 3; margin-bottom: -2rem; }
+  .edad:nth-child(even) .edad__side { grid-column: 4 / span 3; margin-bottom: -1.5rem; }
   .edad:nth-child(even) .edad__side { grid-column: 1 / span 3; }
-  .edad__text { margin-top: 3rem; }
+  .edad__text { margin-top: 2.5rem; }
   .edad:nth-child(even) .edad__text { justify-self: start; }
+  .familias__cta { margin-top: 2.5rem; font-size: 1.35rem; }
 
-  .split { aspect-ratio: 4 / 5; }
-  .specs { grid-template-columns: 1fr; gap: 0; }
-  .specs__item { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: end; padding-block: 1.2rem; }
-  .specs__word { padding-top: 0; }
+  /* Espacios */
+  .split { aspect-ratio: 4 / 5; max-height: none; margin-top: 2rem; }
+  .split__label { font-size: 1.2rem; padding: 0.55rem 0.7rem; }
+  .split__hint { font-size: 0.95rem; }
+  .specs { grid-template-columns: 1fr; gap: 0; margin-top: 2.5rem; }
+  .specs__item { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: center; padding-block: 1.1rem; }
+  .specs__num { font-size: 4.4rem; }
+  .specs__word { padding-top: 0; font-size: 2.6rem; }
+  .specs dd { font-size: 0.98rem; }
+  .rincones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 0.75rem;
+    margin-top: 3rem;
+  }
+  .rincones__a { grid-column: 1; grid-row: 1; }
+  .rincones__c { grid-column: 2; grid-row: 1; margin: 0; }
+  .rincones__b { grid-column: 1 / -1; grid-row: 2; margin-top: 2rem; }
 
-  .rincones__a { grid-column: 1 / span 4; }
-  .rincones__b { grid-column: 1 / -1; margin-top: 3rem; }
-  .rincones__c { grid-column: 3 / -1; margin-top: 3rem; }
+  .casa__grid { display: block; }
+  .casa__head { padding-top: 0; }
+  .casa__photo { margin-top: 2rem; }
+  .casa__text { margin-top: 1.75rem; gap: 1.5rem; }
 
-  .tendedero__track { padding: calc(var(--hdr-h) + 6vh) 10vw 0 18vw; }
-  .hang { width: clamp(13rem, 74vw, 21rem); }
-  .hang--p { width: clamp(10rem, 56vw, 16rem); }
-  .noche__head { bottom: max(5.5rem, 9vh); }
-
-  .casa__head { grid-column: 1 / -1; padding-top: 0; }
-  .casa__photo { grid-column: 1 / -1; grid-row: 2; }
-  .casa__text { grid-column: 1 / -1; grid-row: 3; }
-
-  .inv { grid-template-columns: 1fr; }
+  .inv { grid-template-columns: 1fr; margin-top: 2rem; }
   .inv:not([data-done]) .inv__card { display: none; }
   .inv__card { position: static; order: -1; }
   .inv[data-done] .inv__card { order: 0; }
   .card { rotate: 0deg; }
+  .step__q { font-size: 2rem; margin-bottom: 1.25rem; }
+  .choice { min-height: 3rem; font-size: 1.4rem; }
+  .cal { max-width: none; }
 
-  .llegar__main { grid-column: 1 / -1; }
-  .llegar__sign { grid-column: 3 / -1; }
-  .llegar__links { grid-template-columns: 1fr; gap: 1.1rem; }
+  .llegar__grid { display: block; }
+  .llegar__big { font-size: clamp(3rem, 15vw, 4.5rem); }
+  .llegar__actions { display: grid; }
+  .llegar__sign { width: 60%; margin: 2.5rem 0 0 auto; }
+  .llegar__links { grid-template-columns: 1fr; gap: 1.1rem; margin-top: 2.5rem; }
 }
 
 @media (max-width: 520px) {
