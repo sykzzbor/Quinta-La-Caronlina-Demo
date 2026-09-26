@@ -587,7 +587,7 @@ function initNight() {
     lamps.forEach((l, i) => {
       if (!pinNight || lampX[i] + x < window.innerWidth * 0.95) setTimeout(() => l.setAttribute('data-on', ''), 500 + i * 180);
     });
-    if (pinNight) setTimeout(lightUp, 600);
+    if (pinNight) setTimeout(() => lightUp(), 600);
   };
   const onST = ScrollTrigger.create({ trigger: viewport, start: 'top 75%', onEnter: turnOn });
   syncers.push(() => { if (window.scrollY >= onST.start) turnOn(); });
